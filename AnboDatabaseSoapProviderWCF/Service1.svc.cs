@@ -15,7 +15,7 @@ namespace AnboDatabaseSoapProviderWCF
         public IList<Student> GetAllStudents()
         {
             const string selectAllStudents = "select * from student order by name";
-            IList<Student> studentList = new List<Student>();
+
             using (SqlConnection databaseConnection = new SqlConnection(ConnectionString))
             {
                 databaseConnection.Open();
@@ -23,18 +23,16 @@ namespace AnboDatabaseSoapProviderWCF
                 {
                     using (SqlDataReader reader = selectCommand.ExecuteReader())
                     {
-                        if (reader.HasRows)
+                        List<Student> studentList = new List<Student>();
+                        while (reader.Read())
                         {
-                            while (reader.Read())
-                            {
-                                Student student = ReadStudent(reader);
-                                studentList.Add(student);
-                            }
+                            Student student = ReadStudent(reader);
+                            studentList.Add(student);
                         }
+                        return studentList;
                     }
                 }
             }
-            return studentList;
         }
 
         private static Student ReadStudent(IDataRecord reader)
