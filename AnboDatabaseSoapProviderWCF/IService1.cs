@@ -12,7 +12,10 @@ namespace AnboDatabaseSoapProviderWCF
         List<Student> GetAllStudents();
 
         [OperationContract]
-        Student GetStudent(int id);
+        Student GetStudentById(int id);
+
+        [OperationContract]
+        IList<Student> GetStudentsByName(string name);
 
         [OperationContract]
         int AddStudent(string name, byte semester);

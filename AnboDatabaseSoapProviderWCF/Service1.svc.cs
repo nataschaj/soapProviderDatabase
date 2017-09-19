@@ -54,7 +54,7 @@ namespace AnboDatabaseSoapProviderWCF
             return student;
         }
 
-        public Student GetStudent(int id)
+        public Student GetStudentById(int id)
         {
             const string selectStudent = "select * from student where id=@id";
             using (SqlConnection databaseConnection = new SqlConnection(ConnectionString))
@@ -75,6 +75,11 @@ namespace AnboDatabaseSoapProviderWCF
                     }
                 }
             }
+        }
+
+        public IList<Student> GetStudentsByName(string name)
+        {
+            throw new NotImplementedException();
         }
 
         public int AddStudent(string name, byte semester)
