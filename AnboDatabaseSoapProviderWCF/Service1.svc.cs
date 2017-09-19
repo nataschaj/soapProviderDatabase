@@ -10,13 +10,12 @@ namespace AnboDatabaseSoapProviderWCF
     public class Service1 : IService1
     {
         private const string ConnectionString =
-           //"Server=tcp:anboserver.database.windows.net,1433;Initial Catalog=anboSchoolDatabase;Persist Security Info=False;User ID=anbo;Password=Secret12;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
            "Server=tcp:anbo-databaseserver.database.windows.net,1433;Initial Catalog=anbobase;Persist Security Info=False;User ID=anbo;Password=Secret12;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
 
         public IList<Student> GetAllStudents()
         {
             const string selectAllStudents = "select * from student order by name";
-            IList<Student> result = new List<Student>();
+            IList<Student> studentList = new List<Student>();
             using (SqlConnection databaseConnection = new SqlConnection(ConnectionString))
             {
                 databaseConnection.Open();
@@ -29,13 +28,13 @@ namespace AnboDatabaseSoapProviderWCF
                             while (reader.Read())
                             {
                                 Student student = ReadStudent(reader);
-                                result.Add(student);
+                                studentList.Add(student);
                             }
                         }
                     }
                 }
             }
-            return result;
+            return studentList;
         }
 
         private static Student ReadStudent(IDataRecord reader)
@@ -79,25 +78,25 @@ namespace AnboDatabaseSoapProviderWCF
 
         public IList<Student> GetStudentsByName(string name)
         {
-            string selectStr = "select * from student where name = @name";
+            string selectStr = "select * from student where name like @name";
             using (SqlConnection databaseConnection = new SqlConnection(ConnectionString))
             {
                 databaseConnection.Open();
                 using (SqlCommand selectCommand = new SqlCommand(selectStr, databaseConnection))
                 {
-                    selectCommand.Parameters.AddWithValue("@name", name);
+                    selectCommand.Parameters.AddWithValue("@name", "%" + name + "%");
                     using (SqlDataReader reader = selectCommand.ExecuteReader())
                     {
-                        IList<Student> students = new List<Student>();
+                        IList<Student> studentList = new List<Student>();
                         if (reader.HasRows)
                         {
                             while (reader.Read())
                             {
                                 Student st = ReadStudent(reader);
-                                students.Add(st);
+                                studentList.Add(st);
                             }
                         }
-                        return students;
+                        return studentList;
                     }
                 }
             }
