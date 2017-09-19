@@ -78,7 +78,7 @@ namespace AnboDatabaseSoapProviderWCF
 
         public IList<Student> GetStudentsByName(string name)
         {
-            string selectStr = "select * from student where name like @name";
+            string selectStr = "select * from student where name LIKE @name";
             using (SqlConnection databaseConnection = new SqlConnection(ConnectionString))
             {
                 databaseConnection.Open();
@@ -88,13 +88,10 @@ namespace AnboDatabaseSoapProviderWCF
                     using (SqlDataReader reader = selectCommand.ExecuteReader())
                     {
                         IList<Student> studentList = new List<Student>();
-                        if (reader.HasRows)
+                        while (reader.Read())
                         {
-                            while (reader.Read())
-                            {
-                                Student st = ReadStudent(reader);
-                                studentList.Add(st);
-                            }
+                            Student st = ReadStudent(reader);
+                            studentList.Add(st);
                         }
                         return studentList;
                     }
@@ -103,19 +100,19 @@ namespace AnboDatabaseSoapProviderWCF
         }
 
         public int AddStudent(string name, byte semester)
+        {
+            const string insertStudent = "insert into student (name, semester) values (@name, @semester)";
+            using (SqlConnection databaseConnection = new SqlConnection(ConnectionString))
             {
-                const string insertStudent = "insert into student (name, semester) values (@name, @semester)";
-                using (SqlConnection databaseConnection = new SqlConnection(ConnectionString))
+                databaseConnection.Open();
+                using (SqlCommand insertCommand = new SqlCommand(insertStudent, databaseConnection))
                 {
-                    databaseConnection.Open();
-                    using (SqlCommand insertCommand = new SqlCommand(insertStudent, databaseConnection))
-                    {
-                        insertCommand.Parameters.AddWithValue("@name", name);
-                        insertCommand.Parameters.AddWithValue("@semester", semester);
-                        int rowsAffected = insertCommand.ExecuteNonQuery();
-                        return rowsAffected;
-                    }
+                    insertCommand.Parameters.AddWithValue("@name", name);
+                    insertCommand.Parameters.AddWithValue("@semester", semester);
+                    int rowsAffected = insertCommand.ExecuteNonQuery();
+                    return rowsAffected;
                 }
             }
         }
     }
+}
