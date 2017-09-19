@@ -13,10 +13,10 @@ namespace AnboDatabaseSoapProviderWCF
            //"Server=tcp:anboserver.database.windows.net,1433;Initial Catalog=anboSchoolDatabase;Persist Security Info=False;User ID=anbo;Password=Secret12;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
            "Server=tcp:anbo-databaseserver.database.windows.net,1433;Initial Catalog=anbobase;Persist Security Info=False;User ID=anbo;Password=Secret12;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
 
-        public List<Student> GetAllStudents()
+        public IList<Student> GetAllStudents()
         {
             const string selectAllStudents = "select * from student order by name";
-            List<Student> result = new List<Student>();
+            IList<Student> result = new List<Student>();
             using (SqlConnection databaseConnection = new SqlConnection(ConnectionString))
             {
                 databaseConnection.Open();
@@ -79,23 +79,44 @@ namespace AnboDatabaseSoapProviderWCF
 
         public IList<Student> GetStudentsByName(string name)
         {
-            throw new NotImplementedException();
-        }
-
-        public int AddStudent(string name, byte semester)
-        {
-            const string insertStudent = "insert into student (name, semester) values (@name, @semester)";
+            string selectStr = "select * from student where name = @name";
             using (SqlConnection databaseConnection = new SqlConnection(ConnectionString))
             {
                 databaseConnection.Open();
-                using (SqlCommand insertCommand = new SqlCommand(insertStudent, databaseConnection))
+                using (SqlCommand selectCommand = new SqlCommand(selectStr, databaseConnection))
                 {
-                    insertCommand.Parameters.AddWithValue("@name", name);
-                    insertCommand.Parameters.AddWithValue("@semester", semester);
-                    int rowsAffected = insertCommand.ExecuteNonQuery();
-                    return rowsAffected;
+                    selectCommand.Parameters.AddWithValue("@name", name);
+                    using (SqlDataReader reader = selectCommand.ExecuteReader())
+                    {
+                        IList<Student> students = new List<Student>();
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                Student st = ReadStudent(reader);
+                                students.Add(st);
+                            }
+                        }
+                        return students;
+                    }
+                }
+            }
+        }
+
+        public int AddStudent(string name, byte semester)
+            {
+                const string insertStudent = "insert into student (name, semester) values (@name, @semester)";
+                using (SqlConnection databaseConnection = new SqlConnection(ConnectionString))
+                {
+                    databaseConnection.Open();
+                    using (SqlCommand insertCommand = new SqlCommand(insertStudent, databaseConnection))
+                    {
+                        insertCommand.Parameters.AddWithValue("@name", name);
+                        insertCommand.Parameters.AddWithValue("@semester", semester);
+                        int rowsAffected = insertCommand.ExecuteNonQuery();
+                        return rowsAffected;
+                    }
                 }
             }
         }
     }
-}

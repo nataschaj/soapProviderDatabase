@@ -9,7 +9,7 @@ namespace AnboDatabaseSoapProviderWCF
     public interface IService1
     {
         [OperationContract]
-        List<Student> GetAllStudents();
+        IList<Student> GetAllStudents();
 
         [OperationContract]
         Student GetStudentById(int id);
